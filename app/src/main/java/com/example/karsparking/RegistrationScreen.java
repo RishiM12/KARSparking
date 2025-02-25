@@ -1,9 +1,14 @@
 package com.example.karsparking;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
+
+import android.app.ActivityOptions;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
+import android.util.Pair;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Spinner;
@@ -13,6 +18,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -22,6 +28,7 @@ public class RegistrationScreen extends AppCompatActivity {
     Button btnSignUp;
     Spinner vehicleTypeS;
     FirebaseAuth mFirebaseAuth;
+    FirebaseUser user;
     FirebaseDatabase database;
     DatabaseReference myRef;
     String name, email,vehicleNumber,ph,address,pwd,pwdre,vehicleType;
@@ -33,6 +40,8 @@ public class RegistrationScreen extends AppCompatActivity {
         setContentView(R.layout.activity_registration_screen);
 
         mFirebaseAuth = FirebaseAuth.getInstance();
+        user = mFirebaseAuth.getCurrentUser();      //////////////////////////////////
+
         nameet = findViewById(R.id.etNameR);
         emailet = findViewById(R.id.etEmailR);
         vehicleNoet = findViewById(R.id.etVehicleNumberR);
@@ -112,7 +121,8 @@ public class RegistrationScreen extends AppCompatActivity {
                                     data.setAddress(address);
                                     data.setVehicleType(vehicleType);
                                     data.setVehicleNumber(vehicleNumber);
-                                    myRef.push().setValue(data);
+//                                    myRef.push().setValue(data);
+                                    myRef.child(mFirebaseAuth.getCurrentUser().getUid()).setValue(data);
                                     finish();
                                     startActivity(new Intent(RegistrationScreen.this, MainActivity.class));
                                 } else {
@@ -128,11 +138,18 @@ public class RegistrationScreen extends AppCompatActivity {
         });
 
         toSignIntv.setOnClickListener(new View.OnClickListener() {
+            @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
             @Override
             public void onClick(View v) {
+//                finish();
+                Intent intLogIn = new Intent(RegistrationScreen.this,Login.class);
+                Pair[] pairsReg = new Pair[3];
+                pairsReg[0]= new Pair<View , String>(emailet,"emailTrans");
+                pairsReg[1]= new Pair<View , String>(passwordet,"passwordTrans");
+                pairsReg[2]= new Pair<View , String>(btnSignUp,"logSignTrans");
+                ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(RegistrationScreen.this,pairsReg);
+                startActivity(intLogIn,options.toBundle());
                 finish();
-                Intent i = new Intent(RegistrationScreen.this,Login.class);
-                startActivity(i);
             }
         });
     }
